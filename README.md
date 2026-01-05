@@ -26,6 +26,7 @@ AI-powered sentiment analysis for US real estate markets. Automatically ingests 
 ```bash
 # Clone the repository
 git clone https://github.com/MitudruDutta/real-estate-sentiment.git
+
 cd real-estate-sentiment
 
 # Create virtual environment
