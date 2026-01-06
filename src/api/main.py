@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from groq import AsyncGroq
 
 from src.models import init_db, get_db, Article, Market, Sentiment, Alert, SessionLocal
-from src.config import settings
+from src.config import get_settings
 from src.services.ingestion import IngestionService
 from src.storage.vector_store import VectorStore
 from src.analysis.trends import get_market_trend, get_sentiment_history, get_all_market_trends
@@ -162,6 +162,7 @@ async def trigger_auto_ingest(background_tasks: BackgroundTasks):
 
 @app.post("/api/query")
 async def query_articles(req: QueryRequest):
+    settings = get_settings()
     if not state.vector_store:
         return {"answer": "Service not ready", "sources": [], "error": True}
     

@@ -3,6 +3,7 @@ import json
 import re
 import asyncio
 import logging
+import time
 from groq import AsyncGroq
 from src.services.cache import get_cached, set_cached
 
@@ -37,6 +38,10 @@ class SentimentExtractor:
         settings = get_global_settings()
         self.client = AsyncGroq(api_key=settings.groq_api_key)
         self.valid_markets = set(settings.valid_markets)
+        
+        # Rate limiting
+        self.last_request_time = 0
+        self.min_interval = 60.0 / settings.requests_per_minute
     
     async def extract(self, content: str) -> list[dict]:
         from src.config import get_global_settings
@@ -48,6 +53,12 @@ class SentimentExtractor:
         cached = get_cached(content)
         if cached:
             return cached
+        
+        # Rate limiting
+        elapsed = time.monotonic() - self.last_request_time
+        if elapsed < self.min_interval:
+            await asyncio.sleep(self.min_interval - elapsed)
+        self.last_request_time = time.monotonic()
         
         # Retry with backoff
         for attempt in range(3):
